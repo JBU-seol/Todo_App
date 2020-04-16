@@ -1,26 +1,73 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 
 const { height, width } = Dimensions.get("window");
 
 export default class ToDo extends React.Component{
     state = {
         isEditing: false,
-        isCompleted: false
+        isCompleted: false,
+        toDoValue: ""
     };
 
     render() {
-        const { isCompleted } = this.state;
+        const { isCompleted, isEditing } = this.state;
+        const {toDoValue} = this.state;
+        const { text } = this.props;
         return (
             <View style={styles.container}>
-                <TouchableOpacity onPress={this._toggleComplete}>
-                    <View style={ [styles.circle, isCompleted ? styles.completedCricle : styles.uncompletedCircle]}>
+                <View style={styles.column}>
+                    <TouchableOpacity onPress={this._toggleComplete}>
+                        <View style={
+                            [styles.circle, 
+                            isCompleted ? 
+                            styles.completedCricle : 
+                            styles.uncompletedCircle]} />
+                    </TouchableOpacity>
+                    
+                    { isEditing ? 
+                    (
+                        <TextInput 
+                        style={styles.inputText} 
+                        value={toDoValue} 
+                        multiline={true}
+                        onChangeText={this._controlInput}
+                        returnKeyType={"done"}
+                        onBlur={this._finishEditing}
+                        />
+                    )
+                     : (
+                        <Text
+                        style={[styles.text,
+                        isCompleted ? styles.completedText : styles.uncompletedText]}>
+                        {text}
+                    </Text>
+                    )}
+                </View>
+                {isEditing ?
+                    (
+                    <View style={styles.action}>
+                        <TouchableOpacity onPress={this._finishEditing}>
+                            <View style={styles.actionContainer} >
+                                <Text style={styles.actionText}>V</Text>
+                            </View>
+                        </TouchableOpacity>
                     </View>
-                </TouchableOpacity>
-                <Text style={[styles.text,
-                isCompleted? styles.completedText : styles.uncompletedText ]}>
-                    Hello, I'am To Do !
-                </Text>
+                    )
+                    :(
+                    <View style={styles.action}>
+                        <TouchableOpacity onPress={this._startEditing}>
+                            <View style={styles.actionContainer}>
+                                <Text style={styles.actionText}>O</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity>
+                            <View style={styles.actionContainer}>
+                                <Text style={styles.actionText}>X</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                    )}
             </View>
         )
     }  
@@ -32,6 +79,27 @@ export default class ToDo extends React.Component{
             };
         })
     }
+
+    _startEditing = () => {
+        const { text } = this.props;
+        this.setState({
+            isEditing: true,
+            toDoValue: text
+        })
+    }
+
+    _finishEditing = () => {
+        this.setState({
+            isEditing: false
+        })
+    }
+
+    _controlInput = text => {
+        this.setState({
+            toDoValue: text
+        })
+    }
+
 }
 
 const styles = StyleSheet.create({
@@ -40,7 +108,8 @@ const styles = StyleSheet.create({
         borderBottomColor: "#bbb",
         borderBottomWidth: StyleSheet.hairlineWidth,
         flexDirection: "row",
-        alignItems: "center"
+        alignItems: "center",
+        justifyContent: "space-between"
     },
     text:{
         fontSize: 20,
@@ -60,11 +129,30 @@ const styles = StyleSheet.create({
         borderColor: "red",
         borderWidth: 3,
         marginRight: 20,
+        marginTop: 10
     },
     completedCricle: {
         borderColor: "#bbb"
     },
     uncompletedCircle: {
         borderColor: "red"
+    },
+    column: {
+        flexDirection: "row"      
+    },
+    action : {
+        flexDirection: "row",
+    },
+    actionContainer: {
+        marginVertical: 10,
+        marginHorizontal: 10
+    },
+    actionText: {
+        fontSize: 30
+    },
+    inputText: {
+        fontSize: 20,
+        marginVertical: 10,
+        width: width / 2
     }
 })
